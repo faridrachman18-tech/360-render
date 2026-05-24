@@ -1,0 +1,15 @@
+.next/
+node_modules/
+out/
+dist/
+coverage/
+.env
+.env*.local
+.vercel/
+.superpowers/
+.playwright-cli/
+output/
+dev-server.*.log
+UI References/
+*.tsbuildinfo
+npm-debug.log*
