@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "lastReviewed": "2026-05-26",
+  "lastReviewed": "2026-05-27",
   "app": {
     "name": "360 Render",
     "description": "Private 360 panorama render studio for architects and interior designers.",
@@ -41,7 +41,7 @@
     },
     "publicRoot": {
       "path": "src/app/page.tsx",
-      "responsibility": "Public homepage with dark glassmorphism product positioning, hero proof points, panorama viewer preview, feature cards, workflow steps, showcase, pricing, footer CTAs, anchor links, and placeholder action buttons."
+      "responsibility": "Public homepage with minimal dark product positioning over a full-screen interactive panorama hero, hero CTA, workflow steps, feature cards, showcase, pricing, footer CTAs, anchor links, and placeholder action buttons."
     },
     "homeInteractions": {
       "path": "src/components/HomeInteractions.tsx",
@@ -49,7 +49,11 @@
     },
     "loginPage": {
       "path": "src/app/login/page.tsx",
-      "responsibility": "Email/password login and signup form using Supabase Auth server actions."
+      "responsibility": "Server-rendered login route that resolves safe next-path and status/error messages, then renders the client login form with Supabase Auth server actions."
+    },
+    "loginForm": {
+      "path": "src/app/login/LoginForm.tsx",
+      "responsibility": "Client-side visual login form over the generated architectural background, including email/password fields, password reveal, remember checkbox, Supabase sign in/create account submits, and local placeholder feedback for Google sign-in and password recovery."
     },
     "loginActions": {
       "path": "src/app/login/actions.ts",
@@ -72,7 +76,7 @@
     },
     "heroPanoramaPreview": {
       "path": "src/components/HeroPanoramaPreview.tsx",
-      "responsibility": "Client-side interactive panorama preview on the public homepage, mounting PanoramaSphere with the generated 2:1 penthouse panorama plus title overlay and working reset, zoom, detail, and fullscreen controls."
+      "responsibility": "Client-side full-screen interactive panorama layer for the public homepage hero, mounting PanoramaSphere with the generated 2:1 penthouse panorama, drag-to-rotate interaction, slow idle autorotation, and mousewheel zoom disabled for page scrolling."
     },
     "authProxy": {
       "paths": [
@@ -90,11 +94,11 @@
     },
     "globalStyles": {
       "path": "src/app/globals.css",
-      "responsibility": "Dark desktop-style app chrome, monochrome glass public homepage layout and motion, placeholder action toast styling, project grid/list layouts, viewer overlays, login form styling, responsive behavior, and entrance animations."
+      "responsibility": "Dark desktop-style app chrome, minimal full-bleed public homepage layout with borderless glass accents and motion, placeholder action toast styling, project grid/list layouts, viewer overlays, login form styling, responsive behavior, and entrance animations."
     },
     "panoramaViewer": {
       "path": "src/components/PanoramaSphere.tsx",
-      "responsibility": "Dynamically imports Photo Sphere Viewer on the client, creates/destroys the viewer instance, exposes a minimal controller, and falls back to a static image when WebGL is unavailable."
+      "responsibility": "Dynamically imports Photo Sphere Viewer on the client, creates/destroys the viewer instance, supports configurable mousewheel zoom and opt-in reduced-motion-aware idle autorotation, exposes a minimal controller, and falls back to a static image when WebGL is unavailable."
     },
     "renderJobsApi": {
       "path": "src/app/api/render-jobs/route.ts",
@@ -132,12 +136,12 @@
       {
         "path": "/",
         "access": "public",
-        "behavior": "Public homepage with Start Free and pricing CTAs linking to /login, Watch Demo anchoring to the workflow section, and View All Projects linking to protected /projects."
+        "behavior": "Public homepage with Start Free and pricing CTAs linking to /login, workflow/showcase navigation, and View All Projects linking to protected /projects."
       },
       {
         "path": "/login",
         "access": "guest-focused",
-        "behavior": "Email/password login and signup form. Logged-in users are redirected to /projects by proxy."
+        "behavior": "Reference-aligned full-screen login page with email/password sign in, create account submit, fillable remember checkbox, password reveal, and local placeholder clicks for Google sign-in and forgot password. Logged-in users are redirected to /projects by proxy."
       },
       {
         "path": "/projects",
@@ -159,24 +163,31 @@
       {
         "name": "Homepage",
         "features": [
-          "brand navigation with Pricing, Showcase, Log in, and Start Free links",
-          "dark glass hero with Start Free and Watch Demo CTAs, proof points, and interactive 360 panorama preview",
-          "Render, Upscale, and Present feature cards",
-          "4-step workflow section for upload, preset selection, render/upscale, and viewer sharing",
+          "brand navigation with Pricing, Showcase, and Log in links",
+          "minimal full-screen dark hero with the interactive 360 panorama as the background, floating navigation, copy, CTA, slow idle autorotation, drag-to-rotate interaction, and no visible hero viewer chrome",
+          "4-step workflow section for upload, preset selection, render/upscale, and viewer sharing with extra top breathing room after the hero",
+          "Render, Upscale, and Present feature cards with panorama imagery",
           "showcase project cards using local panorama assets and reference-aligned project labels",
           "static pricing section with Free, Pro, and Studio plans, Yearly selected, and Save up to 30% billing UI",
           "placeholder footer, social, billing, legal, and newsletter actions with in-page feedback",
-          "monochrome dark gray and off-black glass CSS treatment with soft light beams, panorama imagery, transform/opacity entrance motion, hover/press motion, and reduced-motion handling",
+          "monochrome dark gray and off-black CSS treatment with borderless glass accents, soft light beams, panorama imagery, transform/opacity entrance motion, hover/press motion, and reduced-motion handling",
           "footer and newsletter shell"
         ]
       },
       {
         "name": "Login",
         "features": [
+          "generated luxury interior background image",
+          "top-left 360 Render brand link",
+          "borderless glassmorphism welcome panel",
           "email input",
           "password input",
-          "log in action",
-          "sign up action",
+          "password visibility toggle",
+          "remember me checkbox",
+          "forgot password placeholder feedback",
+          "log in action through existing Supabase server action",
+          "Google sign-in placeholder feedback",
+          "create account action through existing Supabase signup server action",
           "query-string status/error messages"
         ]
       },
@@ -213,7 +224,8 @@
       "urlBehavior": "Viewer writes /viewer?project={id}; Projects writes /projects."
     },
     "assets": {
-      "panoramaImages": "public/panoramas/*.jpg plus public/panoramas/generated-hero-panorama.png for the homepage viewer preview",
+      "panoramaImages": "public/panoramas/*.jpg plus public/panoramas/generated-hero-panorama.png for the homepage viewer preview, Render feature card, and Penthouse Suite showcase card",
+      "authLoginBackground": "public/auth-login-background.png generated for the reference-style login screen",
       "favicon": "public/favicon.ico",
       "appIcon": "src/app/icon.svg"
     }
@@ -311,7 +323,7 @@
     "files": [
       {
         "path": "tests/auth-routes.test.ts",
-      "coverage": "Source-level checks for public homepage content and dark glass styling hooks, hero panorama preview asset, auth route structure, protected workspace routes, proxy guard, login actions, env documentation, and architecture docs."
+      "coverage": "Source-level checks for public homepage content and borderless dark glass styling hooks, hero panorama preview asset, auth route structure, protected workspace routes, proxy guard, login actions, env documentation, and architecture docs."
       },
       {
         "path": "tests/render-jobs.test.ts",
@@ -332,7 +344,8 @@
     "The current visible UI does not yet wire upload, preset selection, notes, render-job creation, polling, or persistence into the app screen.",
     "src/lib/mock-data.ts contains richer project and scene concepts that are not currently imported by WorkspaceApp.",
     "Real provider error handling is basic and bubbles thrown errors from API routes.",
-    "Topaz final asset upload is modeled as an asset stage but the current route only returns Topaz process metadata and does not store the final Topaz output."
+    "Topaz final asset upload is modeled as an asset stage but the current route only returns Topaz process metadata and does not store the final Topaz output.",
+    "Login Google sign-in and forgot-password controls are clickable placeholder UI only; no OAuth or recovery backend is wired yet."
   ],
   "maintenanceInstructions": {
     "purpose": "Use this file as the fast orientation map before reading the whole repository.",

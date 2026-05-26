@@ -4,7 +4,6 @@ import {
   ArrowRight,
   Box,
   Check,
-  CirclePlay,
   CloudUpload,
   Eye,
   Instagram,
@@ -22,7 +21,7 @@ const featureCards = [
   {
     title: "Render",
     description: "Photorealistic 360-degree rooms with controlled material detail and believable light.",
-    image: "/panoramas/master-bedroom.jpg",
+    image: "/panoramas/generated-hero-panorama.png",
     icon: Box
   },
   {
@@ -41,23 +40,23 @@ const featureCards = [
 
 const workflowSteps = [
   {
-    title: "Upload Panorama",
-    description: "Drag in a wide panorama or concept capture from the studio.",
+    title: "Export from SketchUp",
+    description: "Get our SketchUp plugin to export panorama images from your projects.",
     icon: CloudUpload
   },
   {
-    title: "Choose Preset",
-    description: "Pick a style direction for lighting, tone, weather, and material finish.",
+    title: "Upload to 360 Render",
+    description: "Bring your panorama into the web app and keep each project ready for rendering.",
     icon: SlidersHorizontal
   },
   {
-    title: "Render & Upscale",
-    description: "We render and sharpen the final scene for presentation clarity.",
+    title: "Render and upscale",
+    description: "Choose a preset, generate the final look, and upscale the panorama for sharper presentation quality.",
     icon: Sparkles
   },
   {
-    title: "Share in Viewer",
-    description: "Send a private, interactive 360-degree experience to the client.",
+    title: "Share the presentation",
+    description: "Send a private 360° viewer to your team or client so they can step inside the design.",
     icon: Monitor
   }
 ];
@@ -84,7 +83,7 @@ const showcaseProjects = [
   {
     title: "Penthouse Suite",
     category: "Residential",
-    image: "/panoramas/master-bedroom.jpg",
+    image: "/panoramas/generated-hero-panorama.png",
     views: "1.6k"
   }
 ];
@@ -152,22 +151,22 @@ export default function Home() {
             <nav className="render-nav-actions" aria-label="Account links">
               <Link href="#pricing">Pricing</Link>
               <Link href="#showcase">Showcase</Link>
-              <Link href="/login">Log in</Link>
               <Link className="render-nav-cta" href="/login">
-                Start Free
+                Log in
               </Link>
             </nav>
           </header>
 
           <section className="render-hero" aria-labelledby="home-title">
+            <HeroPanoramaPreview />
+
             <div className="render-hero-copy">
-              <h1 id="home-title" aria-label="Render. Upscale. Present 360-degree panoramas.">
-                Render. Upscale.
-                <span>Present 360°</span>
-                <em>Panoramas.</em>
+              <h1 id="home-title" aria-label="Step into your design.">
+                Step into your
+                <em>design</em>
               </h1>
               <p className="render-hero-text">
-                Create stunning 360 panoramas, enhance every detail with AI upscaling, and present immersive experiences that win every client.
+                Render, upscale, and share immersive panoramas that make your design easier to understand.
               </p>
               <div className="render-hero-actions">
                 <Link className="render-primary-cta" href="/login">
@@ -176,30 +175,25 @@ export default function Home() {
                     <ArrowRight size={15} strokeWidth={2.2} />
                   </span>
                 </Link>
-                <Link className="render-secondary-cta" href="#how-it-works">
-                  <span className="render-cta-label">Watch Demo</span>
-                  <span className="render-cta-icon" aria-hidden="true">
-                    <CirclePlay size={16} strokeWidth={2} />
-                  </span>
-                </Link>
-              </div>
-              <div className="render-proof-row" aria-label="Plan highlights">
-                <span>
-                  <Check size={13} />
-                  No credit card
-                </span>
-                <span>
-                  <Check size={13} />
-                  Up to 5 free renders
-                </span>
-                <span>
-                  <Check size={13} />
-                  Cancel anytime
-                </span>
               </div>
             </div>
+          </section>
 
-            <HeroPanoramaPreview />
+          <section className="render-workflow" id="how-it-works" aria-labelledby="workflow-title">
+            <div className="render-section-heading">
+              <span>How it works</span>
+              <h2 id="workflow-title">From SketchUp to panorama presentation in 4 simple steps.</h2>
+            </div>
+            <div className="render-step-list">
+              {workflowSteps.map(({ title, description, icon: Icon }, index) => (
+                <article className="render-step-card" key={title} style={{ "--index": index } as CSSProperties}>
+                  <span className="render-step-number">{index + 1}</span>
+                  <Icon size={27} strokeWidth={1.6} />
+                  <h3>{title}</h3>
+                  <p>{description}</p>
+                </article>
+              ))}
+            </div>
           </section>
 
           <section className="render-feature-grid" id="features" aria-label="Render upscale present">
@@ -215,23 +209,6 @@ export default function Home() {
                 <img src={image} alt="" />
               </article>
             ))}
-          </section>
-
-          <section className="render-workflow" id="how-it-works" aria-labelledby="workflow-title">
-            <div className="render-section-heading">
-              <span>How it works</span>
-              <h2 id="workflow-title">From panorama to presentation in 4 simple steps.</h2>
-            </div>
-            <div className="render-step-list">
-              {workflowSteps.map(({ title, description, icon: Icon }, index) => (
-                <article className="render-step-card" key={title} style={{ "--index": index } as CSSProperties}>
-                  <span className="render-step-number">{index + 1}</span>
-                  <Icon size={27} strokeWidth={1.6} />
-                  <h3>{title}</h3>
-                  <p>{description}</p>
-                </article>
-              ))}
-            </div>
           </section>
 
           <section className="render-showcase" id="showcase" aria-labelledby="showcase-title">
