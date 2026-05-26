@@ -1,380 +1,377 @@
-"use client";
-
+import Link from "next/link";
+import type { CSSProperties } from "react";
 import {
+  ArrowRight,
   Box,
-  ChevronDown,
-  CircleHelp,
-  Copy,
-  ExternalLink,
-  Folder,
-  LayoutGrid,
-  List,
-  MoreHorizontal,
-  Plus,
-  RefreshCcw,
-  Search,
-  Settings,
+  Check,
+  CirclePlay,
+  CloudUpload,
+  Eye,
+  Instagram,
+  Linkedin,
+  Monitor,
   SlidersHorizontal,
-  ZoomIn,
-  ZoomOut
+  Sparkles,
+  Twitter,
+  Youtube
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, type ComponentType, type CSSProperties, type ReactNode } from "react";
-import { PanoramaSphere, type PanoramaController } from "@/components/PanoramaSphere";
+import { HeroPanoramaPreview } from "@/components/HeroPanoramaPreview";
+import { HomeInteractions } from "@/components/HomeInteractions";
 
-type Page = "projects" | "viewer";
-type ViewMode = "grid" | "list";
+const featureCards = [
+  {
+    title: "Render",
+    description: "Photorealistic 360-degree rooms with controlled material detail and believable light.",
+    image: "/panoramas/master-bedroom.jpg",
+    icon: Box
+  },
+  {
+    title: "Upscale",
+    description: "AI-powered clarity for surfaces, lighting, and texture without overcooking the scene.",
+    image: "/panoramas/urban-office.jpg",
+    icon: Sparkles
+  },
+  {
+    title: "Present",
+    description: "Immersive viewers that help clients inspect the room instead of the interface.",
+    image: "/panoramas/living-room.jpg",
+    icon: Monitor
+  }
+];
 
-type Project = {
-  id: string;
-  name: string;
-  updatedAt: string;
-  image: string;
+const workflowSteps = [
+  {
+    title: "Upload Panorama",
+    description: "Drag in a wide panorama or concept capture from the studio.",
+    icon: CloudUpload
+  },
+  {
+    title: "Choose Preset",
+    description: "Pick a style direction for lighting, tone, weather, and material finish.",
+    icon: SlidersHorizontal
+  },
+  {
+    title: "Render & Upscale",
+    description: "We render and sharpen the final scene for presentation clarity.",
+    icon: Sparkles
+  },
+  {
+    title: "Share in Viewer",
+    description: "Send a private, interactive 360-degree experience to the client.",
+    icon: Monitor
+  }
+];
+
+const showcaseProjects = [
+  {
+    title: "Oceanfront Villa",
+    category: "Residential",
+    image: "/panoramas/outdoor-terrace.jpg",
+    views: "1.2k"
+  },
+  {
+    title: "Luxury Hotel Lobby",
+    category: "Hospitality",
+    image: "/panoramas/living-room.jpg",
+    views: "2.4k"
+  },
+  {
+    title: "Modern Office HQ",
+    category: "Commercial",
+    image: "/panoramas/urban-office.jpg",
+    views: "1.8k"
+  },
+  {
+    title: "Penthouse Suite",
+    category: "Residential",
+    image: "/panoramas/master-bedroom.jpg",
+    views: "1.6k"
+  }
+];
+
+const pricingPlans = [
+  {
+    name: "Free",
+    description: "For individuals getting started.",
+    price: "$0",
+    features: ["Up to 2 renders / month", "Basic 360-degree viewer", "Standard quality", "Community support"]
+  },
+  {
+    name: "Pro",
+    description: "For pros and growing teams.",
+    price: "$19.99",
+    featured: true,
+    features: ["Up to 50 renders / month", "AI upscaling (4K)", "Custom branding", "Priority email support"]
+  },
+  {
+    name: "Studio",
+    description: "For studios and high volume.",
+    price: "$49.99",
+    features: ["Unlimited renders", "AI upscaling (8K)", "Team collaboration", "Priority support + SLA"]
+  }
+];
+
+type FooterLink = {
+  label: string;
+  href?: string;
 };
 
-type MotionStyle = CSSProperties & {
-  "--tile-index"?: number;
-};
-
-const projects: Project[] = [
+const footerGroups: Array<{ title: string; links: FooterLink[] }> = [
   {
-    id: "beach-house",
-    name: "Beach House",
-    updatedAt: "Updated May 12, 2024",
-    image: "/panoramas/outdoor-terrace.jpg"
+    title: "Product",
+    links: [
+      { label: "Features", href: "#features" },
+      { label: "Workflow", href: "#how-it-works" },
+      { label: "Showcase", href: "#showcase" },
+      { label: "Pricing", href: "#pricing" }
+    ]
   },
   {
-    id: "hotel-lobby",
-    name: "Hotel Lobby",
-    updatedAt: "Updated Apr 28, 2024",
-    image: "/panoramas/living-room.jpg"
+    title: "Company",
+    links: [{ label: "About Us" }, { label: "Careers" }, { label: "Contact" }, { label: "Blog" }]
   },
   {
-    id: "art-gallery",
-    name: "Art Gallery",
-    updatedAt: "Updated Apr 21, 2024",
-    image: "/panoramas/urban-office.jpg"
-  },
-  {
-    id: "penthouse",
-    name: "Penthouse",
-    updatedAt: "Updated Apr 15, 2024",
-    image: "/panoramas/outdoor-terrace.jpg"
-  },
-  {
-    id: "creative-studio",
-    name: "Creative Studio",
-    updatedAt: "Updated Apr 10, 2024",
-    image: "/panoramas/aerial-view.jpg"
-  },
-  {
-    id: "retail-showroom",
-    name: "Retail Showroom",
-    updatedAt: "Updated Apr 5, 2024",
-    image: "/panoramas/living-room.jpg"
-  },
-  {
-    id: "office-hq",
-    name: "Office HQ",
-    updatedAt: "Updated Mar 29, 2024",
-    image: "/panoramas/mountain-resort.jpg"
-  },
-  {
-    id: "hotel-room-501",
-    name: "Hotel Room 501",
-    updatedAt: "Updated Mar 18, 2024",
-    image: "/panoramas/urban-office.jpg"
+    title: "Resources",
+    links: [{ label: "Help Center" }, { label: "Documentation" }, { label: "Guides" }, { label: "API" }]
   }
 ];
 
 export default function Home() {
-  const [page, setPage] = useState<Page>("projects");
-  const [activeProjectId, setActiveProjectId] = useState(projects[0].id);
-  const activeProject = projects.find((project) => project.id === activeProjectId) ?? projects[0];
-
-  useEffect(() => {
-    const requestedPage = getInitialPage();
-    const requestedProjectId = getInitialProjectId();
-
-    if (requestedPage !== "viewer") {
-      return;
-    }
-
-    const timeout = window.setTimeout(() => {
-      setActiveProjectId(requestedProjectId);
-      setPage("viewer");
-    }, 0);
-
-    return () => window.clearTimeout(timeout);
-  }, []);
-
-  function navigateTo(nextPage: Page) {
-    setPage(nextPage);
-    updatePageUrl(nextPage, activeProjectId);
-  }
-
-  function openViewer(projectId: string) {
-    setActiveProjectId(projectId);
-    setPage("viewer");
-    updatePageUrl("viewer", projectId);
-  }
-
   return (
-    <main className={`app-shell ${page === "viewer" ? "viewer-mode" : ""}`}>
-      <TopBar page={page} onNavigate={navigateTo} />
-      {page === "projects" ? (
-        <ProjectsPage activeProjectId={activeProjectId} onNavigate={navigateTo} onOpenViewer={openViewer} />
-      ) : (
-        <ViewerPage onNavigate={navigateTo} project={activeProject} />
-      )}
-    </main>
-  );
-}
+    <main className="render-home">
+      <HomeInteractions>
+        <div className="render-home-shell">
+          <span className="render-light-beam beam-left" aria-hidden="true" />
+          <span className="render-light-beam beam-right" aria-hidden="true" />
 
-function updatePageUrl(page: Page, projectId: string) {
-  if (typeof window === "undefined") {
-    return;
-  }
+          <header className="render-nav" aria-label="Public navigation">
+            <Link className="render-brand" href="/">
+              <Box size={27} strokeWidth={1.7} />
+              <span>360 Render</span>
+            </Link>
+            <nav className="render-nav-actions" aria-label="Account links">
+              <Link href="#pricing">Pricing</Link>
+              <Link href="#showcase">Showcase</Link>
+              <Link href="/login">Log in</Link>
+              <Link className="render-nav-cta" href="/login">
+                Start Free
+              </Link>
+            </nav>
+          </header>
 
-  const nextUrl = page === "viewer" ? `/?page=viewer&project=${encodeURIComponent(projectId)}` : "/";
-  window.history.pushState(null, "", nextUrl);
-}
-
-function getInitialPage(): Page {
-  if (typeof window === "undefined") {
-    return "projects";
-  }
-
-  return new URLSearchParams(window.location.search).get("page") === "viewer" ? "viewer" : "projects";
-}
-
-function getInitialProjectId() {
-  if (typeof window === "undefined") {
-    return projects[0].id;
-  }
-
-  const requestedProject = new URLSearchParams(window.location.search).get("project");
-  if (requestedProject && projects.some((project) => project.id === requestedProject)) {
-    return requestedProject;
-  }
-
-  return projects[0].id;
-}
-
-function TopBar({ page, onNavigate }: { page: Page; onNavigate: (page: Page) => void }) {
-  return (
-    <header className="top-bar">
-      <button className="brand-button" onClick={() => onNavigate("projects")} type="button" aria-label="Open projects">
-        <Box size={27} strokeWidth={1.75} />
-        <span>360 Render</span>
-      </button>
-      <nav className="page-tabs" aria-label="Main pages">
-        <button className={page === "projects" ? "active" : ""} onClick={() => onNavigate("projects")} type="button">
-          Projects
-        </button>
-        <button className={page === "viewer" ? "active" : ""} onClick={() => onNavigate("viewer")} type="button">
-          Viewer
-        </button>
-      </nav>
-      <button className="top-menu" type="button" aria-label="More options">
-        <MoreHorizontal size={26} strokeWidth={2.2} />
-      </button>
-    </header>
-  );
-}
-
-function ProjectsPage({
-  activeProjectId,
-  onNavigate,
-  onOpenViewer
-}: {
-  activeProjectId: string;
-  onNavigate: (page: Page) => void;
-  onOpenViewer: (id: string) => void;
-}) {
-  const [query, setQuery] = useState("");
-  const [sort, setSort] = useState("Last updated");
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
-
-  const visibleProjects = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
-    return projects.filter((project) => project.name.toLowerCase().includes(normalized));
-  }, [query]);
-
-  return (
-    <section className="page-layout projects-layout">
-      <SideRail active="projects" onNavigate={onNavigate} />
-      <div className="projects-content">
-        <div className="projects-title-row">
-          <div>
-            <h1>Projects</h1>
-            <p>{projects.length} projects</p>
-          </div>
-          <div className="primary-actions">
-            <IconButton label="Grid tools" icon={LayoutGrid} />
-            <IconButton label="Filter projects" icon={SlidersHorizontal} />
-            <button className="new-button" type="button">
-              <Plus size={18} />
-              <span>New</span>
-            </button>
-          </div>
-        </div>
-
-        <div className="projects-toolbar">
-          <label className="search-control">
-            <Search size={18} />
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search projects..." />
-          </label>
-          <div className="sort-controls">
-            <span>Sort by</span>
-            <label className="select-control">
-              <select value={sort} onChange={(event) => setSort(event.target.value)}>
-                <option>Last updated</option>
-                <option>Name</option>
-              </select>
-              <ChevronDown size={17} />
-            </label>
-            <div className="view-toggle" aria-label="View mode">
-              <button className={viewMode === "grid" ? "active" : ""} onClick={() => setViewMode("grid")} type="button" aria-label="Grid view">
-                <LayoutGrid size={19} />
-              </button>
-              <button className={viewMode === "list" ? "active" : ""} onClick={() => setViewMode("list")} type="button" aria-label="List view">
-                <List size={21} />
-              </button>
+          <section className="render-hero" aria-labelledby="home-title">
+            <div className="render-hero-copy">
+              <h1 id="home-title" aria-label="Render. Upscale. Present 360-degree panoramas.">
+                Render. Upscale.
+                <span>Present 360°</span>
+                <em>Panoramas.</em>
+              </h1>
+              <p className="render-hero-text">
+                Create stunning 360 panoramas, enhance every detail with AI upscaling, and present immersive experiences that win every client.
+              </p>
+              <div className="render-hero-actions">
+                <Link className="render-primary-cta" href="/login">
+                  <span className="render-cta-label">Start Free</span>
+                  <span className="render-cta-icon" aria-hidden="true">
+                    <ArrowRight size={15} strokeWidth={2.2} />
+                  </span>
+                </Link>
+                <Link className="render-secondary-cta" href="#how-it-works">
+                  <span className="render-cta-label">Watch Demo</span>
+                  <span className="render-cta-icon" aria-hidden="true">
+                    <CirclePlay size={16} strokeWidth={2} />
+                  </span>
+                </Link>
+              </div>
+              <div className="render-proof-row" aria-label="Plan highlights">
+                <span>
+                  <Check size={13} />
+                  No credit card
+                </span>
+                <span>
+                  <Check size={13} />
+                  Up to 5 free renders
+                </span>
+                <span>
+                  <Check size={13} />
+                  Cancel anytime
+                </span>
+              </div>
             </div>
-          </div>
+
+            <HeroPanoramaPreview />
+          </section>
+
+          <section className="render-feature-grid" id="features" aria-label="Render upscale present">
+            {featureCards.map(({ title, description, image, icon: Icon }, index) => (
+              <article className="render-feature-card" key={title} style={{ "--index": index } as CSSProperties}>
+                <div className="render-icon-box">
+                  <Icon size={24} strokeWidth={1.6} />
+                </div>
+                <div className="render-feature-copy">
+                  <h2>{title}</h2>
+                  <p>{description}</p>
+                </div>
+                <img src={image} alt="" />
+              </article>
+            ))}
+          </section>
+
+          <section className="render-workflow" id="how-it-works" aria-labelledby="workflow-title">
+            <div className="render-section-heading">
+              <span>How it works</span>
+              <h2 id="workflow-title">From panorama to presentation in 4 simple steps.</h2>
+            </div>
+            <div className="render-step-list">
+              {workflowSteps.map(({ title, description, icon: Icon }, index) => (
+                <article className="render-step-card" key={title} style={{ "--index": index } as CSSProperties}>
+                  <span className="render-step-number">{index + 1}</span>
+                  <Icon size={27} strokeWidth={1.6} />
+                  <h3>{title}</h3>
+                  <p>{description}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="render-showcase" id="showcase" aria-labelledby="showcase-title">
+            <div className="render-showcase-heading">
+              <div>
+                <span>Showcase</span>
+                <h2 id="showcase-title">Inspiring spaces. Stunning 360-degree experiences.</h2>
+              </div>
+              <Link href="/projects">
+                View All Projects
+                <ArrowRight size={17} />
+              </Link>
+            </div>
+            <div className="render-showcase-grid">
+              {showcaseProjects.map((project, index) => (
+                <article className="render-showcase-card" key={project.title} style={{ "--index": index } as CSSProperties}>
+                  <img src={project.image} alt="" />
+                  <div className="render-showcase-meta">
+                    <div>
+                      <h3>{project.title}</h3>
+                      <p>{project.category}</p>
+                    </div>
+                    <span>
+                      <Eye size={14} />
+                      {project.views}
+                    </span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="render-pricing" id="pricing" aria-labelledby="pricing-title">
+            <div className="render-pricing-heading">
+              <div>
+                <span>Pricing</span>
+                <h2 id="pricing-title">Simple pricing for every studio.</h2>
+              </div>
+              <div className="render-billing-toggle" aria-label="Billing period">
+                <button data-home-action="Monthly billing preview selected." type="button">
+                  Monthly
+                </button>
+                <button className="active" data-home-action="Yearly billing preview selected." type="button">
+                  Yearly
+                </button>
+                <em>Save up to 30%</em>
+              </div>
+            </div>
+
+            <div className="render-pricing-grid">
+              {pricingPlans.map((plan) => (
+                <article className={plan.featured ? "render-price-card featured" : "render-price-card"} key={plan.name}>
+                  {plan.featured ? <span className="render-popular">Most Popular</span> : null}
+                  <h3>{plan.name}</h3>
+                  <p>{plan.description}</p>
+                  <div className="render-price">
+                    {plan.price}
+                    <span>/ month</span>
+                  </div>
+                  <ul>
+                    {plan.features.map((feature) => (
+                      <li key={feature}>
+                        <Check size={14} />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                  <Link className="render-plan-cta" href="/login">
+                    Get Started
+                  </Link>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <footer className="render-footer">
+            <div className="render-footer-brand">
+              <Link className="render-brand" href="/">
+                <Box size={27} strokeWidth={1.7} />
+                <span>360 Render</span>
+              </Link>
+              <p>The all-in-one platform to render, upscale, and present 360-degree panoramas.</p>
+            </div>
+            {footerGroups.map((group) => (
+              <div className="render-footer-links" key={group.title}>
+                <h2>{group.title}</h2>
+                {group.links.map((item) =>
+                  item.href ? (
+                    <Link href={item.href} key={item.label}>
+                      {item.label}
+                    </Link>
+                  ) : (
+                    <button data-home-action={`${item.label} is ready for the next content pass.`} key={item.label} type="button">
+                      {item.label}
+                    </button>
+                  )
+                )}
+              </div>
+            ))}
+            <div className="render-newsletter">
+              <h2>Stay in the loop</h2>
+              <p>Get updates on new features and industry insights.</p>
+              <form data-home-newsletter>
+                <label>
+                  <span>Email address</span>
+                  <input placeholder="Enter your email" type="email" />
+                </label>
+                <button type="submit" aria-label="Subscribe">
+                  <ArrowRight size={18} />
+                </button>
+              </form>
+              <div className="render-socials" aria-label="Social links">
+                <button data-home-action="LinkedIn profile link is ready for setup." type="button" aria-label="LinkedIn">
+                  <Linkedin size={14} />
+                </button>
+                <button data-home-action="Instagram profile link is ready for setup." type="button" aria-label="Instagram">
+                  <Instagram size={14} />
+                </button>
+                <button data-home-action="YouTube profile link is ready for setup." type="button" aria-label="YouTube">
+                  <Youtube size={15} />
+                </button>
+                <button data-home-action="Twitter profile link is ready for setup." type="button" aria-label="Twitter">
+                  <Twitter size={14} />
+                </button>
+              </div>
+            </div>
+            <div className="render-legal">
+              <span>2026 360 Render. All rights reserved.</span>
+              <nav aria-label="Legal links">
+                <button data-home-action="Privacy Policy will open once the legal page is connected." type="button">
+                  Privacy Policy
+                </button>
+                <button data-home-action="Terms of Service will open once the legal page is connected." type="button">
+                  Terms of Service
+                </button>
+              </nav>
+            </div>
+          </footer>
         </div>
-
-        <div className={`project-gallery ${viewMode}`}>
-          {visibleProjects.map((project, index) => (
-            <ProjectCard
-              active={project.id === activeProjectId}
-              index={index}
-              key={project.id}
-              project={project}
-              onOpenViewer={() => onOpenViewer(project.id)}
-            />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ProjectCard({
-  active,
-  index,
-  project,
-  onOpenViewer
-}: {
-  active: boolean;
-  index: number;
-  project: Project;
-  onOpenViewer: () => void;
-}) {
-  return (
-    <article className={`project-tile ${active ? "active" : ""}`} style={{ "--tile-index": index } as MotionStyle}>
-      <button className="project-preview" onClick={onOpenViewer} type="button" aria-label={`Open ${project.name} in viewer`}>
-        <img src={project.image} alt="" />
-      </button>
-      <div className="project-meta">
-        <button className="project-name" onClick={onOpenViewer} type="button">
-          <span>{project.name}</span>
-          <small>{project.updatedAt}</small>
-        </button>
-        <div className="tile-actions">
-          <IconButton label={`Open ${project.name}`} icon={ExternalLink} onClick={onOpenViewer} />
-          <IconButton label={`Duplicate ${project.name}`} icon={Copy} />
-          <IconButton label={`More actions for ${project.name}`} icon={MoreHorizontal} />
-        </div>
-      </div>
-    </article>
-  );
-}
-
-function ViewerPage({ onNavigate, project }: { onNavigate: (page: Page) => void; project: Project }) {
-  const panoramaRef = useRef<PanoramaController | null>(null);
-
-  return (
-    <section className="viewer-stage">
-      <PanoramaSphere src={project.image} onReady={(viewer) => (panoramaRef.current = viewer)} />
-      <div className="viewer-scrim" />
-      <SideRail active="viewer" onNavigate={onNavigate} />
-      <div className="viewer-title">
-        <h1>{project.name}</h1>
-        <p>Viewer</p>
-      </div>
-      <div className="viewer-controls" aria-label="Viewer controls">
-        <button onClick={() => panoramaRef.current?.zoom(8)} type="button" aria-label="Reset view">
-          <RefreshCcw size={27} />
-        </button>
-        <div className="zoom-group">
-          <button onClick={() => panoramaRef.current?.zoomOut(12)} type="button" aria-label="Zoom out">
-            <ZoomOut size={24} />
-          </button>
-          <span />
-          <button onClick={() => panoramaRef.current?.zoomIn(12)} type="button" aria-label="Zoom in">
-            <ZoomIn size={25} />
-          </button>
-        </div>
-        <button onClick={() => panoramaRef.current?.toggleFullscreen()} type="button" aria-label="Fullscreen">
-          <FrameCorners />
-        </button>
-        <button type="button" aria-label="Viewer settings">
-          <Settings size={30} />
-        </button>
-      </div>
-    </section>
-  );
-}
-
-function SideRail({ active, onNavigate }: { active: Page; onNavigate: (page: Page) => void }) {
-  const items: Array<{ key: Page; label: string; icon: ReactNode; selected?: boolean }> = [
-    { key: "viewer", label: "Viewer", icon: <Box size={27} />, selected: active === "viewer" },
-    { key: "projects", label: "Projects", icon: <Folder size={27} />, selected: active === "projects" }
-  ];
-
-  return (
-    <aside className="side-rail" aria-label="Workspace rail">
-      <nav>
-        {items.map((item) => (
-          <button
-            className={item.selected ? "active" : ""}
-            key={item.key}
-            onClick={() => onNavigate(item.key)}
-            type="button"
-            aria-label={item.label}
-          >
-            {item.icon}
-          </button>
-        ))}
-      </nav>
-      <button className="rail-help" type="button" aria-label="Help">
-        <CircleHelp size={23} />
-      </button>
-    </aside>
-  );
-}
-
-function IconButton({
-  label,
-  icon: Icon,
-  onClick
-}: {
-  label: string;
-  icon: ComponentType<{ size?: number; strokeWidth?: number }>;
-  onClick?: () => void;
-}) {
-  return (
-    <button className="icon-button" onClick={onClick} type="button" aria-label={label}>
-      <Icon size={20} />
-    </button>
-  );
-}
-
-function FrameCorners() {
-  return (
-    <svg className="frame-corners" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" />
-    </svg>
+      </HomeInteractions>
+    </main>
   );
 }

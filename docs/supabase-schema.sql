@@ -38,6 +38,20 @@ create table if not exists public.render_jobs (
   updated_at timestamptz not null default now()
 );
 
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  '360-renders',
+  '360-renders',
+  false,
+  52428800,
+  array['image/jpeg', 'image/png', 'image/webp']
+)
+on conflict (id) do update
+set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
 alter table public.projects enable row level security;
 alter table public.scenes enable row level security;
 alter table public.render_jobs enable row level security;

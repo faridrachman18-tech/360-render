@@ -67,10 +67,6 @@ function supportsWebGL() {
     return false;
   }
 
-  if (navigator.webdriver) {
-    return false;
-  }
-
   const canvas = document.createElement("canvas");
   return Boolean(canvas.getContext("webgl") || canvas.getContext("experimental-webgl"));
 }

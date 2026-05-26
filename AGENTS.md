@@ -1,0 +1,3 @@
+Before making changes in this web app, read `docs/architecture.json` first. Treat it as the compact orientation map for the project so you do not need to scan the whole folder just to understand the app.
+
+Whenever you change the app architecture, update `docs/architecture.json` in the same turn. This includes changes to routes, screens, components, data models, provider integrations, environment variables, storage/database schema, tests, assets, or major user flows. Keep the JSON valid, concise, and factual about the current working tree, and note partially wired pieces instead of pretending they are complete.
