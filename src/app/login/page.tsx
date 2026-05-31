@@ -8,8 +8,10 @@ type LoginSearchParams = Promise<{
 }>;
 
 const errorMessages: Record<string, string> = {
+  beta_not_allowed: "This beta is limited to approved tester emails.",
   invalid: "Enter an email and password.",
   login_failed: "The email or password is not correct.",
+  password_mismatch: "Passwords do not match.",
   signup_failed: "Could not create that account. Try again with a different email or password."
 };
 

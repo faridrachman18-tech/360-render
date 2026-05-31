@@ -17,7 +17,7 @@
     "styling": "Global CSS in src/app/globals.css",
     "auth": "Supabase Auth through @supabase/ssr cookie-based server-side clients and Next.js proxy route protection",
     "viewer": "@photo-sphere-viewer/core",
-    "animation": "GSAP ScrollTrigger for public homepage scroll reveals and subtle hero parallax",
+    "animation": "GSAP for public homepage ScrollTrigger effects and reduced-motion-aware auth form mode transitions",
     "icons": "lucide-react",
     "storage": "Supabase Storage through a server-only admin client",
     "database": "Supabase Postgres schema in docs/supabase-schema.sql and supabase/migrations/20260531000000_functional_hardening.sql",
@@ -58,11 +58,11 @@
     },
     "loginForm": {
       "path": "src/app/login/LoginForm.tsx",
-      "responsibility": "Client-side visual login form over the generated architectural background, including email/password fields, password reveal, Supabase sign in/create account submits, and password recovery submit."
+      "responsibility": "Client-side visual auth form over the generated architectural background, including a GSAP-animated sign in/create account mode switch, email/password fields, confirm-password signup field, password reveal, Supabase submits, and password recovery submit."
     },
     "loginActions": {
       "path": "src/app/login/actions.ts",
-      "responsibility": "Server actions for signInWithPassword, signUp, and resetPasswordForEmail, including safe next-path redirects and signup/recovery email redirect metadata."
+      "responsibility": "Server actions for signInWithPassword, signUp, and resetPasswordForEmail, including safe next-path redirects, confirm-password signup validation, BETA_ALLOWED_EMAILS allowlist gating capped at 5 emails, and signup/recovery email redirect metadata."
     },
     "authConfirmRoute": {
       "path": "src/app/auth/confirm/route.ts",
@@ -137,6 +137,10 @@
       "path": "src/lib/render-limits.ts",
       "responsibility": "Defines beta render provider mode defaults, the 3-per-user daily real render limit, UTC daily windows, and render capacity checks."
     },
+    "betaAuthAllowlist": {
+      "path": "src/lib/beta-auth.ts",
+      "responsibility": "Normalizes and parses BETA_ALLOWED_EMAILS, caps configured beta testers to 5 emails, checks app-level beta auth access, and validates signup password confirmation."
+    },
     "domainLibraries": {
       "paths": [
         "src/lib/render-jobs.ts",
@@ -162,7 +166,7 @@
       {
         "path": "/login",
         "access": "guest-focused",
-        "behavior": "Reference-aligned full-screen login page with email/password sign in, create account submit, password reveal, and Supabase password recovery. Logged-in users are redirected to /projects by proxy."
+        "behavior": "Reference-aligned full-screen auth page with a same-panel GSAP transition between sign in and create account modes, app-level beta email allowlist gating, password reveal, confirm-password signup validation, and Supabase password recovery. Logged-in users are redirected to /projects by proxy."
       },
       {
         "path": "/projects",
@@ -203,10 +207,13 @@
           "borderless glassmorphism welcome panel",
           "email input",
           "password input",
+          "confirm password input in create account mode",
           "password visibility toggle",
           "password recovery submit",
           "log in action through existing Supabase server action",
-          "create account action through existing Supabase signup server action",
+          "same-panel create account mode through existing Supabase signup server action",
+          "app-level beta tester email allowlist limited to the first 5 configured emails",
+          "GSAP opacity/translate form transition with reduced-motion handling",
           "query-string status/error messages"
         ]
       },
@@ -317,6 +324,7 @@
       "SUPABASE_PUBLISHABLE_KEY",
       "SUPABASE_SECRET_KEY",
       "SUPABASE_STORAGE_BUCKET",
+      "BETA_ALLOWED_EMAILS",
       "RENDER_PROVIDER_MODE"
     ],
     "securityBoundaries": [
@@ -324,6 +332,7 @@
       "Browser/client auth uses only NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY.",
       "Supabase SSR proxy uses getClaims to validate protected workspace access from cookies.",
       "Supabase admin client uses disabled session persistence and token refresh.",
+      "Login, signup, and password recovery server actions check BETA_ALLOWED_EMAILS before calling Supabase Auth; with no configured emails, beta auth is closed.",
       "Supabase schema enables row level security for projects, scenes, and render_jobs.",
       "Render and Topaz API routes require Supabase Auth before provider or storage work.",
       "Real beta rendering has a daily real render limit of 3 attempts per authenticated user.",
@@ -331,7 +340,7 @@
     ]
   },
   "domainModel": {
-    "authUsers": "Supabase Auth manages user accounts; no custom public users table exists in this MVP.",
+    "authUsers": "Supabase Auth manages user accounts; app-level beta gating only allows emails from BETA_ALLOWED_EMAILS and does not create a custom public users table.",
     "renderStatuses": [
       "uploaded",
       "rendering_openai",
@@ -359,6 +368,10 @@
   },
   "tests": {
     "files": [
+      {
+        "path": "tests/beta-auth.test.ts",
+        "coverage": "Unit and source-level checks for beta email allowlist parsing, 5-email cap, password confirmation validation, login/signup GSAP mode-switch wiring, beta error mapping, and env documentation."
+      },
       {
         "path": "tests/beta-readiness.test.ts",
         "coverage": "Source and helper checks for real beta render mode, daily quota helpers, signed stored panorama URLs, provider failure handling, schema grants, and architecture documentation."
