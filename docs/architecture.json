@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "lastReviewed": "2026-05-27",
+  "lastReviewed": "2026-05-28",
   "app": {
     "name": "360 Render",
     "description": "Private 360 panorama render studio for architects and interior designers.",
@@ -17,6 +17,7 @@
     "styling": "Global CSS in src/app/globals.css",
     "auth": "Supabase Auth through @supabase/ssr cookie-based server-side clients and Next.js proxy route protection",
     "viewer": "@photo-sphere-viewer/core",
+    "animation": "GSAP ScrollTrigger for public homepage scroll reveals and subtle hero parallax",
     "icons": "lucide-react",
     "storage": "Supabase Storage through a server-only admin client",
     "databasePlanned": "Supabase Postgres schema in docs/supabase-schema.sql",
@@ -46,6 +47,10 @@
     "homeInteractions": {
       "path": "src/components/HomeInteractions.tsx",
       "responsibility": "Client-side wrapper for homepage-only placeholder actions, newsletter submit prevention, and toast-style click feedback without navigating away."
+    },
+    "homeScrollEffects": {
+      "path": "src/components/HomeScrollEffects.tsx",
+      "responsibility": "Homepage-only client component that registers GSAP ScrollTrigger in the browser, runs reduced-motion-aware scroll reveal and subtle hero parallax animations, refreshes after load, and cleans up scoped triggers on unmount."
     },
     "loginPage": {
       "path": "src/app/login/page.tsx",
@@ -98,7 +103,7 @@
     },
     "panoramaViewer": {
       "path": "src/components/PanoramaSphere.tsx",
-      "responsibility": "Dynamically imports Photo Sphere Viewer on the client, creates/destroys the viewer instance, supports configurable mousewheel zoom and opt-in reduced-motion-aware idle autorotation, exposes a minimal controller, and falls back to a static image when WebGL is unavailable."
+      "responsibility": "Renders a hydration-stable empty viewer shell, detects WebGL support after mount, dynamically imports Photo Sphere Viewer on the client, creates/destroys the viewer instance, supports configurable mousewheel zoom and opt-in reduced-motion-aware idle autorotation, exposes a minimal controller, and falls back to a static image when WebGL is unavailable."
     },
     "renderJobsApi": {
       "path": "src/app/api/render-jobs/route.ts",
@@ -170,7 +175,7 @@
           "showcase project cards using local panorama assets and reference-aligned project labels",
           "static pricing section with Free, Pro, and Studio plans, Yearly selected, and Save up to 30% billing UI",
           "placeholder footer, social, billing, legal, and newsletter actions with in-page feedback",
-          "monochrome dark gray and off-black CSS treatment with borderless glass accents, soft light beams, panorama imagery, transform/opacity entrance motion, hover/press motion, and reduced-motion handling",
+          "monochrome dark gray and off-black CSS treatment with borderless glass accents, soft light beams, panorama imagery, transform/opacity entrance motion, GSAP ScrollTrigger scroll reveals and subtle hero parallax, hover/press motion, and reduced-motion handling",
           "footer and newsletter shell"
         ]
       },
@@ -323,7 +328,7 @@
     "files": [
       {
         "path": "tests/auth-routes.test.ts",
-      "coverage": "Source-level checks for public homepage content and borderless dark glass styling hooks, hero panorama preview asset, auth route structure, protected workspace routes, proxy guard, login actions, env documentation, and architecture docs."
+      "coverage": "Source-level checks for public homepage content, GSAP ScrollTrigger homepage wiring, borderless dark glass styling hooks, pricing accent color regression, hero panorama preview asset, auth route structure, protected workspace routes, proxy guard, login actions, env documentation, and architecture docs."
       },
       {
         "path": "tests/render-jobs.test.ts",

@@ -3081,6 +3081,14 @@ a {
   align-items: center;
 }
 
+.render-home-shell[data-gsap-scroll="true"] [data-scroll-reveal],
+.render-home-shell[data-gsap-scroll="true"] [data-scroll-item],
+.render-home-shell[data-gsap-scroll="true"] .render-preview,
+.render-home-shell[data-gsap-scroll="true"] .render-hero-copy {
+  animation: none;
+  will-change: transform, opacity;
+}
+
 .render-brand {
   gap: 13px;
   color: #f7f7f4;
@@ -3574,7 +3582,7 @@ a {
 
 .render-billing-toggle em {
   padding-left: 8px;
-  color: #d6ac63;
+  color: rgba(247, 247, 244, 0.7);
   font-style: normal;
 }
 
@@ -3598,11 +3606,11 @@ a {
 }
 
 .render-price-card.featured {
-  border-color: rgba(214, 172, 99, 0.68);
+  border-color: rgba(255, 255, 255, 0.34);
   background:
     radial-gradient(circle at 50% -28%, rgba(255, 255, 255, 0.22), transparent 58%),
-    linear-gradient(180deg, rgba(214, 172, 99, 0.13), rgba(255, 255, 255, 0.018)),
-    rgba(15, 13, 10, 0.86);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.018)),
+    rgba(12, 12, 12, 0.86);
 }
 
 .render-popular {
@@ -3614,8 +3622,8 @@ a {
   min-width: 112px;
   place-items: center;
   border-radius: 999px;
-  background: linear-gradient(180deg, #e9c47e, #c7903c);
-  color: #17120a;
+  background: linear-gradient(180deg, #ffffff, #d9d9d9);
+  color: #101010;
   font-size: 11px;
   font-weight: 760;
   transform: translateX(-50%);
@@ -3671,9 +3679,9 @@ a {
 }
 
 .render-price-card.featured .render-plan-cta {
-  border-color: rgba(214, 172, 99, 0.64);
-  background: linear-gradient(180deg, #dfb562, #bd842f);
-  color: #17120a;
+  border-color: rgba(255, 255, 255, 0.34);
+  background: linear-gradient(180deg, #ffffff, #d9d9d9);
+  color: #101010;
 }
 
 .render-footer {

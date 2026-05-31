@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import type { Viewer as PhotoSphereViewer } from "@photo-sphere-viewer/core";
 import "@photo-sphere-viewer/core/index.css";
 
@@ -24,7 +24,7 @@ export function PanoramaSphere({
   autoRotateIdleDelay = 1200
 }: PanoramaSphereProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [webglSupported] = useState(() => (typeof window === "undefined" ? true : supportsWebGL()));
+  const webglSupported = useSyncExternalStore(subscribeWebGLSupport, getWebGLSnapshot, getServerWebGLSnapshot);
 
   useEffect(() => {
     let disposed = false;
@@ -35,7 +35,11 @@ export function PanoramaSphere({
     let pausedUntil = 0;
     let removeAutoRotateListeners: (() => void) | undefined;
 
-    if (!webglSupported) {
+    if (webglSupported === null) {
+      return;
+    }
+
+    if (webglSupported === false) {
       onReady?.(null);
       return;
     }
@@ -114,6 +118,18 @@ function supportsWebGL() {
 
   const canvas = document.createElement("canvas");
   return Boolean(canvas.getContext("webgl") || canvas.getContext("experimental-webgl"));
+}
+
+function subscribeWebGLSupport() {
+  return () => undefined;
+}
+
+function getWebGLSnapshot() {
+  return supportsWebGL();
+}
+
+function getServerWebGLSnapshot() {
+  return null;
 }
 
 type AutoRotateOptions = {

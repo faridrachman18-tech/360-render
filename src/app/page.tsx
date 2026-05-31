@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { HeroPanoramaPreview } from "@/components/HeroPanoramaPreview";
 import { HomeInteractions } from "@/components/HomeInteractions";
+import { HomeScrollEffects } from "@/components/HomeScrollEffects";
 
 const featureCards = [
   {
@@ -139,6 +140,7 @@ export default function Home() {
   return (
     <main className="render-home">
       <HomeInteractions>
+        <HomeScrollEffects />
         <div className="render-home-shell">
           <span className="render-light-beam beam-left" aria-hidden="true" />
           <span className="render-light-beam beam-right" aria-hidden="true" />
@@ -180,13 +182,13 @@ export default function Home() {
           </section>
 
           <section className="render-workflow" id="how-it-works" aria-labelledby="workflow-title">
-            <div className="render-section-heading">
+            <div className="render-section-heading" data-scroll-reveal="">
               <span>How it works</span>
               <h2 id="workflow-title">From SketchUp to panorama presentation in 4 simple steps.</h2>
             </div>
-            <div className="render-step-list">
+            <div className="render-step-list" data-scroll-group="">
               {workflowSteps.map(({ title, description, icon: Icon }, index) => (
-                <article className="render-step-card" key={title} style={{ "--index": index } as CSSProperties}>
+                <article className="render-step-card" data-scroll-item="" key={title} style={{ "--index": index } as CSSProperties}>
                   <span className="render-step-number">{index + 1}</span>
                   <Icon size={27} strokeWidth={1.6} />
                   <h3>{title}</h3>
@@ -196,9 +198,9 @@ export default function Home() {
             </div>
           </section>
 
-          <section className="render-feature-grid" id="features" aria-label="Render upscale present">
+          <section className="render-feature-grid" data-scroll-group="" id="features" aria-label="Render upscale present">
             {featureCards.map(({ title, description, image, icon: Icon }, index) => (
-              <article className="render-feature-card" key={title} style={{ "--index": index } as CSSProperties}>
+              <article className="render-feature-card" data-scroll-item="" key={title} style={{ "--index": index } as CSSProperties}>
                 <div className="render-icon-box">
                   <Icon size={24} strokeWidth={1.6} />
                 </div>
@@ -212,7 +214,7 @@ export default function Home() {
           </section>
 
           <section className="render-showcase" id="showcase" aria-labelledby="showcase-title">
-            <div className="render-showcase-heading">
+            <div className="render-showcase-heading" data-scroll-reveal="">
               <div>
                 <span>Showcase</span>
                 <h2 id="showcase-title">Inspiring spaces. Stunning 360-degree experiences.</h2>
@@ -222,9 +224,9 @@ export default function Home() {
                 <ArrowRight size={17} />
               </Link>
             </div>
-            <div className="render-showcase-grid">
+            <div className="render-showcase-grid" data-scroll-group="">
               {showcaseProjects.map((project, index) => (
-                <article className="render-showcase-card" key={project.title} style={{ "--index": index } as CSSProperties}>
+                <article className="render-showcase-card" data-scroll-item="" key={project.title} style={{ "--index": index } as CSSProperties}>
                   <img src={project.image} alt="" />
                   <div className="render-showcase-meta">
                     <div>
@@ -242,7 +244,7 @@ export default function Home() {
           </section>
 
           <section className="render-pricing" id="pricing" aria-labelledby="pricing-title">
-            <div className="render-pricing-heading">
+            <div className="render-pricing-heading" data-scroll-reveal="">
               <div>
                 <span>Pricing</span>
                 <h2 id="pricing-title">Simple pricing for every studio.</h2>
@@ -258,9 +260,9 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="render-pricing-grid">
+            <div className="render-pricing-grid" data-scroll-group="">
               {pricingPlans.map((plan) => (
-                <article className={plan.featured ? "render-price-card featured" : "render-price-card"} key={plan.name}>
+                <article className={plan.featured ? "render-price-card featured" : "render-price-card"} data-scroll-item="" key={plan.name}>
                   {plan.featured ? <span className="render-popular">Most Popular</span> : null}
                   <h3>{plan.name}</h3>
                   <p>{plan.description}</p>
@@ -284,7 +286,7 @@ export default function Home() {
             </div>
           </section>
 
-          <footer className="render-footer">
+          <footer className="render-footer" data-scroll-reveal="">
             <div className="render-footer-brand">
               <Link className="render-brand" href="/">
                 <Box size={27} strokeWidth={1.7} />
