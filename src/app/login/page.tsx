@@ -17,6 +17,7 @@ const errorMessages: Record<string, string> = {
 
 const messages: Record<string, string> = {
   check_email: "Account created. Check your email to confirm your login.",
+  password_updated: "Password updated. Sign in with your new password.",
   recovery_email: "Password recovery email sent. Check your inbox for the reset link."
 };
 

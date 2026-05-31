@@ -1875,6 +1875,7 @@ a {
 }
 
 .auth-link-button,
+.auth-create a,
 .auth-create button {
   border: 0;
   background: transparent;
@@ -1884,6 +1885,7 @@ a {
   line-height: 1;
 }
 
+.auth-create a,
 .auth-create button {
   color: #f9f9f7;
 }
@@ -1985,6 +1987,7 @@ a {
 .auth-google:focus-visible,
 .auth-icon-button:focus-visible,
 .auth-link-button:focus-visible,
+.auth-create a:focus-visible,
 .auth-create button:focus-visible,
 .auth-remember input:focus-visible,
 .auth-brand:focus-visible {
@@ -2006,6 +2009,7 @@ a {
 
   .auth-icon-button:hover,
   .auth-link-button:hover,
+  .auth-create a:hover,
   .auth-create button:hover {
     color: #ffffff;
   }
@@ -2019,6 +2023,7 @@ a {
 .auth-google:active,
 .auth-icon-button:active,
 .auth-link-button:active,
+.auth-create a:active,
 .auth-create button:active,
 .auth-brand:active {
   transform: translateY(1px) scale(0.98);
