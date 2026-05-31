@@ -27,6 +27,16 @@ describe("beta auth allowlist", () => {
     expect(isBetaEmailAllowed("stranger@example.com", allowedEmails)).toBe(false);
   });
 
+  it("rejects emails beyond the five-account beta cap", () => {
+    const allowedEmails = parseAllowedBetaEmails(
+      "one@example.com,two@example.com,three@example.com,four@example.com,five@example.com,six@example.com",
+    );
+
+    expect(allowedEmails).toHaveLength(5);
+    expect(isBetaEmailAllowed("five@example.com", allowedEmails)).toBe(true);
+    expect(isBetaEmailAllowed("six@example.com", allowedEmails)).toBe(false);
+  });
+
   it("blocks everyone when no beta allowlist is configured", () => {
     expect(isBetaEmailAllowed("anyone@example.com", [])).toBe(false);
   });
@@ -38,6 +48,40 @@ describe("beta auth allowlist", () => {
 });
 
 describe("login/signup form wiring", () => {
+  it("keeps create account as a mode switch instead of a signup navigation or immediate submit", () => {
+    const loginForm = source("src/app/login/LoginForm.tsx");
+
+    expect(loginForm).toContain('type AuthMode = "login" | "signup"');
+    expect(loginForm).toContain('useState<AuthMode>("login")');
+    expect(loginForm).toContain('setAuthMode(isSignup ? "login" : "signup")');
+    expect(loginForm).toContain('type="button"');
+    expect(loginForm).not.toContain('href="/signup"');
+    expect(loginForm).not.toContain('formAction={signupAction} type="button"');
+  });
+
+  it("renders signup-only confirmation and login-only recovery controls from auth mode state", () => {
+    const loginForm = source("src/app/login/LoginForm.tsx");
+
+    expect(loginForm).toContain("isSignup ? (");
+    expect(loginForm).toContain('name="confirmPassword"');
+    expect(loginForm).toContain("!isSignup ? (");
+    expect(loginForm).toContain("formAction={recoveryAction}");
+    expect(loginForm).toContain('autoComplete={isSignup ? "new-password" : "current-password"}');
+    expect(loginForm).toContain('placeholder={isSignup ? "Create a password" : "Enter your password"}');
+  });
+
+  it("keeps the reduced-motion-aware GSAP transition scoped and cleaned up", () => {
+    const loginForm = source("src/app/login/LoginForm.tsx");
+
+    expect(loginForm).toContain('import gsap from "gsap"');
+    expect(loginForm).toContain("formContentRef");
+    expect(loginForm).toContain("gsap.context");
+    expect(loginForm).toContain("gsap.fromTo");
+    expect(loginForm).toContain("prefers-reduced-motion: reduce");
+    expect(loginForm).toContain("context.revert()");
+    expect(loginForm).toContain('duration: 0.22');
+  });
+
   it("switches auth modes with GSAP instead of navigating to a signup page", () => {
     const loginForm = source("src/app/login/LoginForm.tsx");
     const loginActions = source("src/app/login/actions.ts");
@@ -57,6 +101,9 @@ describe("login/signup form wiring", () => {
     expect(loginActions).toContain("BETA_ALLOWED_EMAILS");
     expect(loginActions).toContain("isBetaEmailAllowed");
     expect(loginActions).toContain("passwordsMatch");
+    expect(loginActions.indexOf("ensureBetaEmailAllowed(email, next);")).toBeGreaterThan(
+      loginActions.indexOf("if (!email || !password)"),
+    );
     expect(loginActions.indexOf("ensureBetaEmailAllowed(email, next);")).toBeLessThan(
       loginActions.indexOf("signInWithPassword"),
     );

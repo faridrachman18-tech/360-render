@@ -370,7 +370,7 @@
     "files": [
       {
         "path": "tests/beta-auth.test.ts",
-        "coverage": "Unit and source-level checks for beta email allowlist parsing, 5-email cap, password confirmation validation, login/signup GSAP mode-switch wiring, beta error mapping, and env documentation."
+        "coverage": "Unit and source-level checks for beta email allowlist parsing, 5-email cap including sixth-email rejection, closed empty allowlist behavior, password confirmation validation, same-panel login/signup mode switching, signup-only confirm-password controls, login-only recovery controls, GSAP cleanup/reduced-motion wiring, beta error mapping, and env documentation."
       },
       {
         "path": "tests/beta-readiness.test.ts",
