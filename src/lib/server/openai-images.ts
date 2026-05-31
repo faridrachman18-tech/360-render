@@ -15,6 +15,8 @@ export type OpenAIRenderResult = {
   outputSize: string;
 };
 
+const OPENAI_IMAGE_MODEL = "gpt-image-1.5";
+
 export async function renderPanoramaWithOpenAI(input: OpenAIRenderInput): Promise<OpenAIRenderResult> {
   const apiKey = process.env.OPENAI_API_KEY;
 
@@ -24,9 +26,9 @@ export async function renderPanoramaWithOpenAI(input: OpenAIRenderInput): Promis
 
   const preset = getPresetById(input.presetId);
   const formData = new FormData();
-  formData.append("model", "gpt-image-2");
+  formData.append("model", OPENAI_IMAGE_MODEL);
   formData.append("image", input.image);
-  formData.append("size", "3840x1920");
+  formData.append("size", "1536x1024");
   formData.append("output_format", "jpeg");
   formData.append("prompt", `${preset.prompt}\n\nAdditional designer notes: ${input.notes || "none"}`);
 
@@ -52,7 +54,7 @@ export async function renderPanoramaWithOpenAI(input: OpenAIRenderInput): Promis
   return {
     bytes: Buffer.from(b64, "base64"),
     mimeType: "image/jpeg",
-    model: "gpt-image-2",
-    outputSize: "3840x1920"
+    model: OPENAI_IMAGE_MODEL,
+    outputSize: "1536x1024"
   };
 }

@@ -166,16 +166,17 @@ describe("auth route structure", () => {
     expect(loginPage).toContain("signupAction={signup}");
     expect(loginForm).toContain('name="email"');
     expect(loginForm).toContain('name="password"');
-    expect(loginForm).toContain('name="remember"');
+    expect(loginForm).not.toContain('name="remember"');
     expect(loginForm).toContain("formAction={loginAction}");
     expect(loginForm).toContain("formAction={signupAction}");
-    expect(loginForm).toContain("Continue with Google");
-    expect(loginForm).toContain("Forgot password?");
+    expect(loginForm).toContain("formAction={recoveryAction}");
+    expect(loginForm).toContain("Email reset link");
     expect(loginForm).toContain("passwordVisible");
     expect(globalStyles).toContain("/auth-login-background.png");
     expect(existsSync(fileURLToPath(new URL("../public/auth-login-background.png", import.meta.url)))).toBe(true);
     expect(loginActions).toContain("signInWithPassword");
     expect(loginActions).toContain("signUp");
+    expect(loginActions).toContain("resetPasswordForEmail");
   });
 
   it("protects workspace routes in the Next.js proxy", () => {

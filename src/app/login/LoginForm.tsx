@@ -10,17 +10,13 @@ type LoginFormProps = {
   errorMessage: string;
   loginAction: AuthAction;
   next: string;
+  recoveryAction: AuthAction;
   signupAction: AuthAction;
   statusMessage: string;
 };
 
-export function LoginForm({ errorMessage, loginAction, next, signupAction, statusMessage }: LoginFormProps) {
+export function LoginForm({ errorMessage, loginAction, next, recoveryAction, signupAction, statusMessage }: LoginFormProps) {
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [notice, setNotice] = useState("");
-
-  function showNotice(message: string) {
-    setNotice(message);
-  }
 
   return (
     <div className="auth-shell">
@@ -73,12 +69,9 @@ export function LoginForm({ errorMessage, loginAction, next, signupAction, statu
           </label>
 
           <div className="auth-options">
-            <label className="auth-remember">
-              <input name="remember" type="checkbox" />
-              <span>Remember me</span>
-            </label>
-            <button className="auth-link-button" onClick={() => showNotice("Password recovery will be connected next.")} type="button">
-              Forgot password?
+            <span className="auth-recovery-hint">Use your account email for recovery.</span>
+            <button className="auth-link-button" formAction={recoveryAction} formNoValidate type="submit">
+              Email reset link
             </button>
           </div>
 
@@ -88,26 +81,9 @@ export function LoginForm({ errorMessage, loginAction, next, signupAction, statu
             </p>
           ) : null}
           {statusMessage ? <p className="auth-alert success">{statusMessage}</p> : null}
-          {notice ? (
-            <p className="auth-alert neutral" aria-live="polite">
-              {notice}
-            </p>
-          ) : null}
-
           <button className="auth-submit" formAction={loginAction} type="submit">
             <span>Sign in</span>
             <ArrowRight aria-hidden="true" size={25} strokeWidth={1.75} />
-          </button>
-
-          <div className="auth-divider">
-            <span>or</span>
-          </div>
-
-          <button className="auth-google" onClick={() => showNotice("Google sign-in will be connected next.")} type="button">
-            <span className="auth-google-mark" aria-hidden="true">
-              G
-            </span>
-            <span>Continue with Google</span>
           </button>
 
           <p className="auth-create">

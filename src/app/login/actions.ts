@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-type AuthActionMessage = "invalid" | "login_failed" | "signup_failed" | "check_email";
+type AuthActionMessage = "invalid" | "login_failed" | "signup_failed" | "check_email" | "recovery_email";
 
 function formString(formData: FormData, name: string) {
   const value = formData.get(name);
@@ -16,7 +16,8 @@ function safeNextPath(value: string) {
 }
 
 function loginPath(message: AuthActionMessage, next: string) {
-  const params = new URLSearchParams({ [message === "check_email" ? "message" : "error"]: message });
+  const isStatusMessage = message === "check_email" || message === "recovery_email";
+  const params = new URLSearchParams({ [isStatusMessage ? "message" : "error"]: message });
 
   if (next !== "/projects") {
     params.set("next", next);
@@ -75,4 +76,26 @@ export async function signup(formData: FormData) {
   }
 
   redirect(loginPath("check_email", next));
+}
+
+export async function recoverPassword(formData: FormData) {
+  const email = formString(formData, "email");
+  const next = safeNextPath(formString(formData, "next"));
+
+  if (!email) {
+    redirect(loginPath("invalid", next));
+  }
+
+  const requestHeaders = await headers();
+  const origin = requestHeaders.get("origin") ?? process.env.NEXT_PUBLIC_SITE_URL;
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: origin ? `${origin}/login?next=${encodeURIComponent(next)}&message=recovery_email` : undefined
+  });
+
+  if (error) {
+    redirect(loginPath("login_failed", next));
+  }
+
+  redirect(loginPath("recovery_email", next));
 }
