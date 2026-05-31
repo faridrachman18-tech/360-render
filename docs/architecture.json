@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "lastReviewed": "2026-05-27",
+  "lastReviewed": "2026-05-31",
   "app": {
     "name": "360 Render",
     "description": "Private 360 panorama render studio for architects and interior designers.",
-    "currentMvp": "A Next.js app with a public marketing homepage, Supabase email/password auth protecting a project gallery and immersive 360 panorama viewer, and server-side render pipeline endpoints prepared for OpenAI image edits, Topaz upscaling, and Supabase storage.",
+    "currentMvp": "A Next.js app with a public marketing homepage, Supabase email/password auth protecting Supabase-backed project and scene data, a project gallery, a real beta upload-to-render workspace flow, an immersive 360 panorama viewer, and server-side render pipeline endpoints for OpenAI image edits, Topaz upscaling, Supabase storage, and daily render limits.",
     "primaryUsers": [
       "architects",
       "interior designers",
@@ -17,9 +17,10 @@
     "styling": "Global CSS in src/app/globals.css",
     "auth": "Supabase Auth through @supabase/ssr cookie-based server-side clients and Next.js proxy route protection",
     "viewer": "@photo-sphere-viewer/core",
+    "animation": "GSAP ScrollTrigger for public homepage scroll reveals and subtle hero parallax",
     "icons": "lucide-react",
     "storage": "Supabase Storage through a server-only admin client",
-    "databasePlanned": "Supabase Postgres schema in docs/supabase-schema.sql",
+    "database": "Supabase Postgres schema in docs/supabase-schema.sql and supabase/migrations/20260531000000_functional_hardening.sql",
     "imageRendering": "OpenAI Images API via server-only helper",
     "upscaling": "Topaz Labs Image API via server-only helper",
     "testing": "Vitest"
@@ -47,17 +48,21 @@
       "path": "src/components/HomeInteractions.tsx",
       "responsibility": "Client-side wrapper for homepage-only placeholder actions, newsletter submit prevention, and toast-style click feedback without navigating away."
     },
+    "homeScrollEffects": {
+      "path": "src/components/HomeScrollEffects.tsx",
+      "responsibility": "Homepage-only client component that registers GSAP ScrollTrigger in the browser, runs reduced-motion-aware scroll reveal and subtle hero parallax animations, refreshes after load, and cleans up scoped triggers on unmount."
+    },
     "loginPage": {
       "path": "src/app/login/page.tsx",
       "responsibility": "Server-rendered login route that resolves safe next-path and status/error messages, then renders the client login form with Supabase Auth server actions."
     },
     "loginForm": {
       "path": "src/app/login/LoginForm.tsx",
-      "responsibility": "Client-side visual login form over the generated architectural background, including email/password fields, password reveal, remember checkbox, Supabase sign in/create account submits, and local placeholder feedback for Google sign-in and password recovery."
+      "responsibility": "Client-side visual login form over the generated architectural background, including email/password fields, password reveal, Supabase sign in/create account submits, and password recovery submit."
     },
     "loginActions": {
       "path": "src/app/login/actions.ts",
-      "responsibility": "Server actions for signInWithPassword and signUp, including safe next-path redirects and signup email redirect metadata."
+      "responsibility": "Server actions for signInWithPassword, signUp, and resetPasswordForEmail, including safe next-path redirects and signup/recovery email redirect metadata."
     },
     "authConfirmRoute": {
       "path": "src/app/auth/confirm/route.ts",
@@ -68,11 +73,11 @@
         "src/app/projects/page.tsx",
         "src/app/viewer/page.tsx"
       ],
-      "responsibility": "Protected App Router pages that mount WorkspaceApp on the Projects or Viewer screen."
+      "responsibility": "Protected App Router pages that load Supabase-backed workspace data and mount WorkspaceApp on the Projects or Viewer screen."
     },
     "workspaceClientExperience": {
       "path": "src/components/WorkspaceApp.tsx",
-      "responsibility": "Client-side project gallery and panorama viewer UI. Maintains local navigation state, syncs viewer state to /projects and /viewer query params, and exposes logout."
+      "responsibility": "Client-side project gallery, create-project panel, upload/render panel, and panorama viewer UI. Receives Supabase-backed project and scene data, creates projects through /api/projects, submits real render jobs through /api/render-jobs, polls Topaz status until ready/failed, updates scenes with signed image URLs, maintains local navigation state, and exposes logout."
     },
     "heroPanoramaPreview": {
       "path": "src/components/HeroPanoramaPreview.tsx",
@@ -98,15 +103,27 @@
     },
     "panoramaViewer": {
       "path": "src/components/PanoramaSphere.tsx",
-      "responsibility": "Dynamically imports Photo Sphere Viewer on the client, creates/destroys the viewer instance, supports configurable mousewheel zoom and opt-in reduced-motion-aware idle autorotation, exposes a minimal controller, and falls back to a static image when WebGL is unavailable."
+      "responsibility": "Renders a hydration-stable empty viewer shell, detects WebGL support after mount, dynamically imports Photo Sphere Viewer on the client, creates/destroys the viewer instance, supports configurable mousewheel zoom and opt-in reduced-motion-aware idle autorotation, exposes a minimal controller, and falls back to a static image when WebGL is unavailable."
     },
     "renderJobsApi": {
       "path": "src/app/api/render-jobs/route.ts",
-      "responsibility": "Accepts multipart render-job requests. Mock mode returns a fake job. Real mode uploads the source image, renders through OpenAI, stores the OpenAI output, starts a Topaz upscale, and returns provider/storage metadata."
+      "responsibility": "Authenticated multipart render-job endpoint. Production defaults to real mode; local development defaults to mock unless RENDER_PROVIDER_MODE overrides it. Real mode enforces a 3-per-user daily real render limit, uploads the source image, renders through OpenAI, stores the OpenAI output, starts a Topaz upscale, records provider metadata, returns an interim signed URL, and marks failed provider/storage work."
+    },
+    "projectsApi": {
+      "path": "src/app/api/projects/route.ts",
+      "responsibility": "Authenticated JSON endpoint for creating owner-scoped Supabase project rows."
     },
     "topazStatusApi": {
       "path": "src/app/api/topaz/status/[processId]/route.ts",
-      "responsibility": "Polls Topaz async status by process id and includes a download link once the Topaz job is completed."
+      "responsibility": "Authenticated Topaz status polling endpoint that verifies the process belongs to the current user's render job, returns download metadata when complete, uploads the final Topaz asset to Supabase Storage, returns a signed final URL, and marks the scene/job ready or failed."
+    },
+    "workspaceData": {
+      "path": "src/lib/server/workspace-data.ts",
+      "responsibility": "Server-only Supabase workspace loader that maps projects, scenes, and latest render jobs into WorkspaceApp view models with empty/error states and signed URLs for private stored panorama assets."
+    },
+    "authHelpers": {
+      "path": "src/lib/server/auth.ts",
+      "responsibility": "Server-only helper for authenticated route handlers, using Supabase getClaims and shared 401 JSON responses."
     },
     "supabaseServer": {
       "path": "src/lib/server/supabase.ts",
@@ -115,6 +132,10 @@
     "panoramaStorage": {
       "path": "src/lib/server/panorama-storage.ts",
       "responsibility": "Uploads panorama assets to the configured Supabase Storage bucket and creates signed URLs for stored assets."
+    },
+    "renderLimits": {
+      "path": "src/lib/render-limits.ts",
+      "responsibility": "Defines beta render provider mode defaults, the 3-per-user daily real render limit, UTC daily windows, and render capacity checks."
     },
     "domainLibraries": {
       "paths": [
@@ -131,7 +152,7 @@
     }
   },
   "frontendArchitecture": {
-    "renderingModel": "The protected workspace is a client component because it uses local state, browser URL APIs, and imperative viewer controls. Login and route protection are server-rendered/server-action driven.",
+    "renderingModel": "Protected workspace routes load Supabase-backed workspace data on the server, then hydrate a client component for local state, browser URL APIs, file upload validation, render submission, polling, and imperative viewer controls. Login and route protection are server-rendered/server-action driven.",
     "routes": [
       {
         "path": "/",
@@ -141,7 +162,7 @@
       {
         "path": "/login",
         "access": "guest-focused",
-        "behavior": "Reference-aligned full-screen login page with email/password sign in, create account submit, fillable remember checkbox, password reveal, and local placeholder clicks for Google sign-in and forgot password. Logged-in users are redirected to /projects by proxy."
+        "behavior": "Reference-aligned full-screen login page with email/password sign in, create account submit, password reveal, and Supabase password recovery. Logged-in users are redirected to /projects by proxy."
       },
       {
         "path": "/projects",
@@ -170,7 +191,7 @@
           "showcase project cards using local panorama assets and reference-aligned project labels",
           "static pricing section with Free, Pro, and Studio plans, Yearly selected, and Save up to 30% billing UI",
           "placeholder footer, social, billing, legal, and newsletter actions with in-page feedback",
-          "monochrome dark gray and off-black CSS treatment with borderless glass accents, soft light beams, panorama imagery, transform/opacity entrance motion, hover/press motion, and reduced-motion handling",
+          "monochrome dark gray and off-black CSS treatment with borderless glass accents, soft light beams, panorama imagery, transform/opacity entrance motion, GSAP ScrollTrigger scroll reveals and subtle hero parallax, hover/press motion, and reduced-motion handling",
           "footer and newsletter shell"
         ]
       },
@@ -183,10 +204,8 @@
           "email input",
           "password input",
           "password visibility toggle",
-          "remember me checkbox",
-          "forgot password placeholder feedback",
+          "password recovery submit",
           "log in action through existing Supabase server action",
-          "Google sign-in placeholder feedback",
           "create account action through existing Supabase signup server action",
           "query-string status/error messages"
         ]
@@ -197,10 +216,14 @@
           "top bar with Projects and Viewer tabs",
           "logout button",
           "side rail navigation",
+          "Supabase-backed project and scene data",
+          "create project panel",
+          "upload panorama panel with 2:1 validation",
+          "preset selection and real render job submit",
           "local project search",
           "sort select UI",
           "grid/list toggle",
-          "project cards with local static panorama thumbnails"
+          "project cards with persisted scene counts and status badges"
         ]
       },
       {
@@ -241,18 +264,30 @@
       },
       {
         "method": "POST",
+        "path": "/api/projects",
+        "runtime": "nodejs",
+        "input": "JSON with name string",
+        "behavior": "Requires Supabase Auth, creates an owner-scoped project row, and returns the created project."
+      },
+      {
+        "method": "POST",
         "path": "/api/render-jobs",
         "runtime": "nodejs",
         "maxDurationSeconds": 300,
-        "input": "multipart/form-data with image File, presetId string, optional notes string, and optional mode string",
-        "mockBehavior": "Any mode other than real returns a fake job id with status rendering_openai and skips provider calls.",
+        "input": "multipart/form-data with image File, presetId string, optional notes string, optional projectId string, optional sceneName string, and optional mode string",
+        "auth": "Requires Supabase Auth and returns 401 for guests.",
+        "mockBehavior": "Mock mode is retained for local development and creates Supabase scene/render_job records with status rendering_openai while skipping provider calls.",
         "realBehavior": [
+          "enforce the daily real render limit",
           "create a job id",
           "upload source asset to Supabase Storage",
+          "create Supabase scene and render_job records scoped to the current user's project",
           "call OpenAI image edits with the selected render preset",
           "upload OpenAI render output to Supabase Storage",
+          "return a signed OpenAI interim image URL",
           "start Topaz async upscale",
-          "return job, storage, OpenAI, and Topaz metadata"
+          "return job, storage, OpenAI, Topaz metadata, and remaining daily quota",
+          "mark scene/job failed with a readable message on provider or storage failure"
         ]
       },
       {
@@ -260,16 +295,17 @@
         "path": "/api/topaz/status/[processId]",
         "runtime": "nodejs",
         "input": "Topaz process id in the route segment",
-        "behavior": "Fetches Topaz status and adds download metadata when status is completed."
+        "auth": "Requires Supabase Auth and returns 401 for guests.",
+        "behavior": "Fetches Topaz status for an owned render job, adds download metadata when completed, stores the final Topaz output, returns a signed final URL, and marks records ready or failed."
       }
     ],
     "providerFlow": [
       "Authenticated user submits a 2:1 panorama image and render preset.",
       "Server stores the source in Supabase Storage.",
-      "Server sends the image and prompt to OpenAI Images for a 3840x1920 jpeg render.",
+      "Server sends the image and prompt to OpenAI Images for a 1536x1024 jpeg render.",
       "Server stores the OpenAI render in Supabase Storage.",
       "Server sends the OpenAI render to Topaz for a 4096x2048 jpeg upscale.",
-      "Client can poll Topaz status and request download metadata when completed."
+      "Client polls Topaz status; when completed, the server downloads and stores the final Topaz output, then returns a signed final panorama URL for the viewer."
     ],
     "environmentVariables": [
       "OPENAI_API_KEY",
@@ -289,7 +325,9 @@
       "Supabase SSR proxy uses getClaims to validate protected workspace access from cookies.",
       "Supabase admin client uses disabled session persistence and token refresh.",
       "Supabase schema enables row level security for projects, scenes, and render_jobs.",
-      "Storage bucket is private by default."
+      "Render and Topaz API routes require Supabase Auth before provider or storage work.",
+      "Real beta rendering has a daily real render limit of 3 attempts per authenticated user.",
+      "Storage bucket is private by default and has owner-scoped storage.objects policies documented in the migration."
     ]
   },
   "domainModel": {
@@ -310,7 +348,7 @@
     "plannedDatabaseEntities": [
       "projects",
       "scenes",
-      "render_jobs",
+      "render_jobs with owner_id, mode, started_at, provider process metadata, and failure messages",
       "360-renders storage bucket"
     ],
     "assetStages": [
@@ -322,8 +360,16 @@
   "tests": {
     "files": [
       {
+        "path": "tests/beta-readiness.test.ts",
+        "coverage": "Source and helper checks for real beta render mode, daily quota helpers, signed stored panorama URLs, provider failure handling, schema grants, and architecture documentation."
+      },
+      {
         "path": "tests/auth-routes.test.ts",
-      "coverage": "Source-level checks for public homepage content and borderless dark glass styling hooks, hero panorama preview asset, auth route structure, protected workspace routes, proxy guard, login actions, env documentation, and architecture docs."
+      "coverage": "Source-level checks for public homepage content, GSAP ScrollTrigger homepage wiring, borderless dark glass styling hooks, pricing accent color regression, hero panorama preview asset, auth route structure, protected workspace routes, proxy guard, login/recovery actions, env documentation, and architecture docs."
+      },
+      {
+        "path": "tests/functional-hardening.test.ts",
+        "coverage": "Source-level checks for authenticated render/Topaz APIs, Supabase-backed workspace loading, create/upload/render UI wiring, password recovery, migration/env documentation, and provider request defaults."
       },
       {
         "path": "tests/render-jobs.test.ts",
@@ -340,12 +386,9 @@
     ]
   },
   "knownGaps": [
-    "The visible workspace still uses local project data rather than persisted Supabase project rows.",
-    "The current visible UI does not yet wire upload, preset selection, notes, render-job creation, polling, or persistence into the app screen.",
     "src/lib/mock-data.ts contains richer project and scene concepts that are not currently imported by WorkspaceApp.",
-    "Real provider error handling is basic and bubbles thrown errors from API routes.",
-    "Topaz final asset upload is modeled as an asset stage but the current route only returns Topaz process metadata and does not store the final Topaz output.",
-    "Login Google sign-in and forgot-password controls are clickable placeholder UI only; no OAuth or recovery backend is wired yet."
+    "The Supabase migration file has been added but still must be applied to the target project before persisted workspace data works outside environments where the schema already exists.",
+    "Google OAuth is intentionally out of v1 and no longer appears in the login UI."
   ],
   "maintenanceInstructions": {
     "purpose": "Use this file as the fast orientation map before reading the whole repository.",

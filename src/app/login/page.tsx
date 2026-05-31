@@ -1,5 +1,5 @@
 import { LoginForm } from "./LoginForm";
-import { login, signup } from "./actions";
+import { login, recoverPassword, signup } from "./actions";
 
 type LoginSearchParams = Promise<{
   error?: string;
@@ -14,7 +14,8 @@ const errorMessages: Record<string, string> = {
 };
 
 const messages: Record<string, string> = {
-  check_email: "Account created. Check your email to confirm your login."
+  check_email: "Account created. Check your email to confirm your login.",
+  recovery_email: "Password recovery email sent. Check your inbox for the reset link."
 };
 
 function safeNextPath(value?: string) {
@@ -33,6 +34,7 @@ export default async function LoginPage({ searchParams }: { searchParams: LoginS
         errorMessage={errorMessage}
         loginAction={login}
         next={next}
+        recoveryAction={recoverPassword}
         signupAction={signup}
         statusMessage={statusMessage}
       />

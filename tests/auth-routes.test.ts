@@ -66,6 +66,10 @@ describe("auth route structure", () => {
     expect(globalStyles).not.toContain(".render-preview-rail");
     expect(panoramaSphere).toContain("mousewheel = true");
     expect(panoramaSphere).toContain("autoRotate = false");
+    expect(panoramaSphere).toContain("useSyncExternalStore");
+    expect(panoramaSphere).toContain("getServerWebGLSnapshot");
+    expect(panoramaSphere).not.toContain('typeof window === "undefined" ? true : supportsWebGL()');
+    expect(panoramaSphere).not.toContain("setWebglSupported(supportsWebGL())");
     expect(panoramaSphere).toContain("prefers-reduced-motion: reduce");
     expect(panoramaSphere).toContain("requestAnimationFrame");
     expect(panoramaSphere).not.toContain("navigator.webdriver");
@@ -100,6 +104,44 @@ describe("auth route structure", () => {
     expect(globalStyles).toContain("prefers-reduced-motion: reduce");
   });
 
+  it("wires GSAP ScrollTrigger effects into the public homepage", () => {
+    const rootPage = source("src/app/page.tsx");
+    const architecture = source("docs/architecture.json");
+    const scrollEffectsPath = fileURLToPath(new URL("../src/components/HomeScrollEffects.tsx", import.meta.url));
+
+    expect(existsSync(scrollEffectsPath)).toBe(true);
+
+    const scrollEffects = source("src/components/HomeScrollEffects.tsx");
+
+    expect(rootPage).toContain("HomeScrollEffects");
+    expect(rootPage).toContain("<HomeScrollEffects />");
+    expect(rootPage).toContain("data-scroll-reveal");
+    expect(rootPage).toContain("data-scroll-group");
+    expect(scrollEffects).toContain('"use client"');
+    expect(scrollEffects).toContain('gsap');
+    expect(scrollEffects).toContain("gsap/ScrollTrigger");
+    expect(scrollEffects).toContain("gsap.registerPlugin(ScrollTrigger)");
+    expect(scrollEffects).toContain("prefers-reduced-motion: no-preference");
+    expect(scrollEffects).toContain("ScrollTrigger.refresh");
+    expect(scrollEffects).toContain("ctx.revert()");
+    expect(architecture).toContain("HomeScrollEffects.tsx");
+    expect(architecture).toContain("GSAP ScrollTrigger");
+  });
+
+  it("keeps the pricing section free of warm yellow accents", () => {
+    const globalStyles = source("src/app/globals.css");
+    const ctaIndex = globalStyles.indexOf(".render-price-card.featured .render-plan-cta");
+    const footerIndex = globalStyles.indexOf(".render-footer", ctaIndex);
+    const pricingStyles = globalStyles.slice(
+      globalStyles.lastIndexOf(".render-billing-toggle", ctaIndex),
+      footerIndex,
+    );
+
+    expect(pricingStyles).toContain(".render-popular");
+    expect(pricingStyles).not.toMatch(/#(?:d6ac63|e9c47e|c7903c|dfb562|bd842f)\b/i);
+    expect(pricingStyles).not.toMatch(/rgba?\(\s*214\s*,\s*172\s*,\s*99\b/i);
+  });
+
   it("exposes protected projects and viewer routes", () => {
     expect(existsSync(fileURLToPath(new URL("../src/app/projects/page.tsx", import.meta.url)))).toBe(true);
     expect(existsSync(fileURLToPath(new URL("../src/app/viewer/page.tsx", import.meta.url)))).toBe(true);
@@ -124,16 +166,17 @@ describe("auth route structure", () => {
     expect(loginPage).toContain("signupAction={signup}");
     expect(loginForm).toContain('name="email"');
     expect(loginForm).toContain('name="password"');
-    expect(loginForm).toContain('name="remember"');
+    expect(loginForm).not.toContain('name="remember"');
     expect(loginForm).toContain("formAction={loginAction}");
     expect(loginForm).toContain("formAction={signupAction}");
-    expect(loginForm).toContain("Continue with Google");
-    expect(loginForm).toContain("Forgot password?");
+    expect(loginForm).toContain("formAction={recoveryAction}");
+    expect(loginForm).toContain("Email reset link");
     expect(loginForm).toContain("passwordVisible");
     expect(globalStyles).toContain("/auth-login-background.png");
     expect(existsSync(fileURLToPath(new URL("../public/auth-login-background.png", import.meta.url)))).toBe(true);
     expect(loginActions).toContain("signInWithPassword");
     expect(loginActions).toContain("signUp");
+    expect(loginActions).toContain("resetPasswordForEmail");
   });
 
   it("protects workspace routes in the Next.js proxy", () => {
