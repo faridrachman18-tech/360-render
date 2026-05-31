@@ -2,9 +2,17 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { isBetaEmailAllowed, parseAllowedBetaEmails, passwordsMatch } from "@/lib/beta-auth";
 import { createClient } from "@/lib/supabase/server";
 
-type AuthActionMessage = "invalid" | "login_failed" | "signup_failed" | "check_email" | "recovery_email";
+type AuthActionMessage =
+  | "beta_not_allowed"
+  | "invalid"
+  | "login_failed"
+  | "password_mismatch"
+  | "signup_failed"
+  | "check_email"
+  | "recovery_email";
 
 function formString(formData: FormData, name: string) {
   const value = formData.get(name);
@@ -26,6 +34,16 @@ function loginPath(message: AuthActionMessage, next: string) {
   return `/login?${params.toString()}`;
 }
 
+function betaAllowedEmails() {
+  return parseAllowedBetaEmails(process.env.BETA_ALLOWED_EMAILS);
+}
+
+function ensureBetaEmailAllowed(email: string, next: string) {
+  if (!isBetaEmailAllowed(email, betaAllowedEmails())) {
+    redirect(loginPath("beta_not_allowed", next));
+  }
+}
+
 export async function login(formData: FormData) {
   const email = formString(formData, "email");
   const password = formString(formData, "password");
@@ -34,6 +52,8 @@ export async function login(formData: FormData) {
   if (!email || !password) {
     redirect(loginPath("invalid", next));
   }
+
+  ensureBetaEmailAllowed(email, next);
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -48,10 +68,17 @@ export async function login(formData: FormData) {
 export async function signup(formData: FormData) {
   const email = formString(formData, "email");
   const password = formString(formData, "password");
+  const confirmPassword = formString(formData, "confirmPassword");
   const next = safeNextPath(formString(formData, "next"));
 
   if (!email || !password) {
     redirect(loginPath("invalid", next));
+  }
+
+  ensureBetaEmailAllowed(email, next);
+
+  if (!passwordsMatch(password, confirmPassword)) {
+    redirect(loginPath("password_mismatch", next));
   }
 
   const requestHeaders = await headers();
@@ -85,6 +112,8 @@ export async function recoverPassword(formData: FormData) {
   if (!email) {
     redirect(loginPath("invalid", next));
   }
+
+  ensureBetaEmailAllowed(email, next);
 
   const requestHeaders = await headers();
   const origin = requestHeaders.get("origin") ?? process.env.NEXT_PUBLIC_SITE_URL;
