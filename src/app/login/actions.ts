@@ -119,7 +119,7 @@ export async function recoverPassword(formData: FormData) {
   const origin = requestHeaders.get("origin") ?? process.env.NEXT_PUBLIC_SITE_URL;
   const supabase = await createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: origin ? `${origin}/login?next=${encodeURIComponent(next)}&message=recovery_email` : undefined
+    redirectTo: origin ? `${origin}/auth/reset-password?next=${encodeURIComponent(next)}` : undefined
   });
 
   if (error) {

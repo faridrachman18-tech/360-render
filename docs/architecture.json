@@ -68,6 +68,13 @@
       "path": "src/app/auth/confirm/route.ts",
       "responsibility": "Handles Supabase email confirmation token_hash callbacks and redirects confirmed users into the protected workspace."
     },
+    "resetPasswordRoute": {
+      "paths": [
+        "src/app/auth/reset-password/page.tsx",
+        "src/app/auth/reset-password/ResetPasswordForm.tsx"
+      ],
+      "responsibility": "Public password recovery landing screen that exchanges Supabase recovery codes for a session, shows a new-password/confirm-password form, calls Supabase updateUser, and returns users to login after a successful password update."
+    },
     "workspaceRoutes": {
       "paths": [
         "src/app/projects/page.tsx",
@@ -182,6 +189,11 @@
         "path": "/auth/confirm",
         "access": "public callback",
         "behavior": "Supabase signup email confirmation callback."
+      },
+      {
+        "path": "/auth/reset-password",
+        "access": "public recovery callback",
+        "behavior": "Supabase password recovery callback and form for setting a new password before returning to /login."
       }
     ],
     "screens": [
@@ -210,6 +222,7 @@
           "confirm password input in create account mode",
           "password visibility toggle",
           "password recovery submit",
+          "password recovery links redirect to /auth/reset-password for new-password entry",
           "log in action through existing Supabase server action",
           "same-panel create account mode through existing Supabase signup server action",
           "app-level beta tester email allowlist limited to the first 5 configured emails",
@@ -382,7 +395,7 @@
       },
       {
         "path": "tests/functional-hardening.test.ts",
-        "coverage": "Source-level checks for authenticated render/Topaz APIs, Supabase-backed workspace loading, create/upload/render UI wiring, password recovery, migration/env documentation, and provider request defaults."
+        "coverage": "Source-level checks for authenticated render/Topaz APIs, Supabase-backed workspace loading, create/upload/render UI wiring, password recovery request and reset-password form wiring, migration/env documentation, and provider request defaults."
       },
       {
         "path": "tests/render-jobs.test.ts",

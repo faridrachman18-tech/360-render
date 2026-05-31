@@ -40,12 +40,24 @@ describe("functional hardening", () => {
     const loginActions = source("src/app/login/actions.ts");
     const loginForm = source("src/app/login/LoginForm.tsx");
     const loginPage = source("src/app/login/page.tsx");
+    const resetPasswordPage = source("src/app/auth/reset-password/page.tsx");
+    const resetPasswordForm = source("src/app/auth/reset-password/ResetPasswordForm.tsx");
 
     expect(loginActions).toContain("resetPasswordForEmail");
     expect(loginActions).toContain("recoverPassword");
+    expect(loginActions).toContain("/auth/reset-password");
     expect(loginPage).toContain("recoverPassword");
+    expect(loginPage).toContain("password_updated");
     expect(loginForm).toContain("recoveryAction");
     expect(loginForm).toContain("formNoValidate");
+    expect(resetPasswordPage).toContain("ResetPasswordForm");
+    expect(resetPasswordForm).toContain("exchangeCodeForSession");
+    expect(resetPasswordForm).toContain("PASSWORD_RECOVERY");
+    expect(resetPasswordForm).toContain("updateUser({ password");
+    expect(resetPasswordForm).toContain('name="password"');
+    expect(resetPasswordForm).toContain('name="confirmPassword"');
+    expect(resetPasswordForm).toContain('message: "password_updated"');
+    expect(resetPasswordForm).toContain("window.location.assign");
     expect(loginForm).not.toContain("Google sign-in will be connected next.");
     expect(loginForm).not.toContain('name="remember"');
   });
